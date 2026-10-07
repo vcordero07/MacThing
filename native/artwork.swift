@@ -1,10 +1,14 @@
-// artwork <in-image> <max-size> <cover.jpg> [background.jpg]
-// Prepares a cover for the device in one pass, and prints {"width":…,"height":…} of cover.jpg.
+// artwork <in-image> <max-size> <cover.jpg> <wide.jpg> [background.jpg]
+// Prepares a cover for the device in one pass, and prints {"width":…,"height":…} of cover.jpg,
+// plus "wideWidth" and "wideHeight" of wide.jpg.
 //
 // cover.jpg: a square JPEG of at most <max-size>px (the art panel is exactly 480×480), whatever the
 // source format was (HEIC/TIFF would not render on the device's 2018-era Chromium). The centre
 // crop happens at the source's own resolution, before any resize: a 16:9 video thumbnail scaled to
 // fit 480 first is only 270px tall, and filling the square from that stretches it by 1.8×.
+//
+// wide.jpg: the same cover with its aspect kept, long edge at most <max-size>. Now Playing's 16:9
+// setting shows this inside the square; the square crop stays for the default fill and the blur.
 //
 // background.jpg: the album art background the device shows behind the UI — the cover filling the
 // screen's width with mirrored copies against its left and right edges, blurred and saturated to
@@ -21,10 +25,10 @@ import CoreImage
 import Foundation
 
 let args = CommandLine.arguments
-guard args.count > 3, let maxSide = Double(args[2]),
+guard args.count > 4, let maxSide = Double(args[2]),
   let input = CIImage(contentsOf: URL(fileURLWithPath: args[1]), options: [.applyOrientationProperty: true])
 else {
-  FileHandle.standardError.write("usage: artwork <in-image> <max-size> <cover.jpg> [background.jpg]\n".data(using: .utf8)!)
+  FileHandle.standardError.write("usage: artwork <in-image> <max-size> <cover.jpg> <wide.jpg> [background.jpg]\n".data(using: .utf8)!)
   exit(2)
 }
 
@@ -51,11 +55,30 @@ let cover = side < sourceSide
       .cropped(to: CGRect(x: 0, y: 0, width: side, height: side))
   : square
 
+let coverContext = CIContext(options: [.outputColorSpace: srgb])
 do {
-  try writeJPEG(cover, args[3], quality: 0.88, context: CIContext(options: [.outputColorSpace: srgb]))
+  try writeJPEG(cover, args[3], quality: 0.88, context: coverContext)
 } catch {
   FileHandle.standardError.write("artwork: \(error.localizedDescription)\n".data(using: .utf8)!)
   exit(1)
+}
+
+// The whole frame, long edge at most max-size. A square source comes out square too.
+let longSide = max(e.width, e.height)
+let wideScale = min(1, CGFloat(maxSide) / longSide)
+let wideW = max(1, (e.width * wideScale).rounded())
+let wideH = max(1, (e.height * wideScale).rounded())
+let fitted = wideScale < 1
+  ? atOrigin(input).applyingFilter("CILanczosScaleTransform", parameters: [kCIInputScaleKey: wideScale, kCIInputAspectRatioKey: 1])
+  : atOrigin(input)
+let wide = fitted.cropped(to: CGRect(x: 0, y: 0, width: wideW, height: wideH))
+var wideWidth = 0, wideHeight = 0
+do {
+  try writeJPEG(wide, args[4], quality: 0.88, context: coverContext)
+  wideWidth = Int(wideW)
+  wideHeight = Int(wideH)
+} catch {
+  FileHandle.standardError.write("artwork: wide: \(error.localizedDescription)\n".data(using: .utf8)!)
 }
 
 // ---- Background ----
@@ -100,7 +123,7 @@ func backgroundTint(_ image: CIImage, context: CIContext) -> String {
 }
 
 var tint: String? = nil
-if args.count > 4 {
+if args.count > 5 {
   let scale: CGFloat = 0.5 // of the device's 800×480 screen
   let bgSide = 800 * scale, bgHeight = 480 * scale
   let fit = bgSide / side
@@ -131,7 +154,7 @@ if args.count > 4 {
   // Browsers apply CSS filters to sRGB values as they are, so blur in sRGB rather than linear light.
   let bgContext = CIContext(options: [.workingColorSpace: srgb, .outputColorSpace: srgb])
   do {
-    try writeJPEG(background, args[4], quality: 0.85, context: bgContext)
+    try writeJPEG(background, args[5], quality: 0.85, context: bgContext)
     tint = backgroundTint(background, context: bgContext)
   } catch {
     FileHandle.standardError.write("artwork: background: \(error.localizedDescription)\n".data(using: .utf8)!)
@@ -139,4 +162,5 @@ if args.count > 4 {
 }
 
 let tintField = tint.map { ",\"tint\":" + $0 } ?? ""
-print("{\"width\":\(Int(side)),\"height\":\(Int(side))\(tintField)}")
+let wideField = wideWidth > 0 ? ",\"wideWidth\":\(wideWidth),\"wideHeight\":\(wideHeight)" : ""
+print("{\"width\":\(Int(side)),\"height\":\(Int(side))\(wideField)\(tintField)}")

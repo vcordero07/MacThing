@@ -69,7 +69,7 @@ onMounted(() => {
 onUnmounted(() => clearInterval(timer));
 </script>
 <template>
-  <section ref="root" id="screen-nowplaying" class="screen fill flex" :class="{ active: state.current === 'nowplaying', leaving: state.leaving === 'nowplaying', idle: !np.active, paused: np.active && !np.playing, 'no-duration': !np.duration }">
+  <section ref="root" id="screen-nowplaying" class="screen fill flex" :class="{ active: state.current === 'nowplaying', leaving: state.leaving === 'nowplaying', idle: !np.active, paused: np.active && !np.playing, 'no-duration': !np.duration, 'art-wide': state.settings.artFit === 'wide' }">
     <LeftRail ref="rail" variant="media" :eyebrow="np.active ? np.artist : ''" :title="np.active ? np.title : 'Nothing playing'" :subtitle="album" :muted-subtitle="!np.album">
       <template #lower>
         <div class="np-progress flex items-center gap-8 primary"><UiProgress :value="fraction" /><span class="np-duration flex-none regular">{{ np.duration ? durationText(np.duration) : '' }}</span></div>

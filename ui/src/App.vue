@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { state, hasArt, ambientUrl, ambientPreBlurred, ambientTint, artworkDirection } from './state.js';
+import { flatColor } from './palette.js';
 import Artwork from './components/Artwork.vue';
 import IconSymbols from './components/IconSymbols.vue';
 import UiProgress from './components/UiProgress.vue';
@@ -12,7 +13,13 @@ import SettingsScreen from './screens/SettingsScreen.vue';
 import MeetingAlert from './components/MeetingAlert.vue';
 // The paused badge on Now Playing shows flashes itself (it swaps its icon), so the flash's own disc stays hidden.
 const pausedBadge = computed(() => state.current === 'nowplaying' && state.np.active && !state.np.playing);
-const ambient = computed(() => !!(state.settings.artBackground && hasArt.value));
+const background = computed(() => {
+  const mode = state.settings.background;
+  if (mode === 'art' || mode === 'color' || mode === 'off') return mode;
+  return state.settings.artBackground ? 'art' : 'off';
+});
+const ambient = computed(() => background.value === 'art' && hasArt.value);
+const flat = computed(() => (background.value === 'color' ? flatColor(state.settings.flatColor) || flatColor('blue') : null));
 const NOTCHED = ['nowplaying', 'calendar', 'weather', 'clock']; // left to right, as the top buttons run
 // Settings has no top button, so the notch stays under the last page's while it fades out.
 const notchAt = ref(Math.max(0, NOTCHED.indexOf(state.current)));
@@ -20,7 +27,7 @@ watch(() => state.current, current => { if (NOTCHED.includes(current)) notchAt.v
 </script>
 <template>
   <IconSymbols />
-  <div id="app" :data-screen="state.current" :class="{ offline: state.offline, asleep: state.asleep, light: state.light, 'ambient-on': ambient, 'show-volume': state.showVolume, 'volume-unsupported': state.volumeUnsupported }">
+  <div id="app" :data-screen="state.current" :data-ink="flat ? state.settings.fontColor : null" :style="flat ? { '--flat': flat.hex } : null" :class="{ offline: state.offline, asleep: state.asleep, light: state.light, 'ambient-on': ambient, 'flat-on': !!flat, 'show-volume': state.showVolume, 'volume-unsupported': state.volumeUnsupported }">
     <div v-if="ambient" class="ambient fill" :class="{ 'pre-blurred': ambientPreBlurred }"><Artwork :url="ambientUrl" :direction="artworkDirection" :tint="ambientTint" /></div>
     <div class="screens fill" :data-switch="state.screenSwitch || null"><NowPlayingScreen /><CalendarScreen /><WeatherScreen /><ClockScreen /><SettingsScreen /></div>
     <div class="page-notch" :class="{ on: NOTCHED.includes(state.current) }" :style="{ transform: 'translateX(' + notchAt * 201 + 'px)' }" />

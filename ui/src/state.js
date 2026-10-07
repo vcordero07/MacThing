@@ -4,7 +4,7 @@ import { initializeRuntime } from '../js/core.js';
 export const state = reactive({
   // screenSwitch: how the current screen is coming in ('fade', 'next', 'previous'), until it has (core.js).
   current: 'nowplaying', leaving: '', screenSwitch: 'fade', offline: true, asleep: false, light: false,
-  settings: { theme: 'dark', units: 'F', clock24h: false, clockFace: 'analog', digitalSeconds: true, digitalLarge: false, artBackground: false, rotateEvery: 0, meetingAlert: 0, meetingTimer: false, location: { mode: 'auto' } },
+  settings: { theme: 'dark', units: 'F', clock24h: false, clockFace: 'analog', digitalSeconds: true, digitalLarge: false, background: 'off', flatColor: 'blue', fontColor: 'light', artFit: 'square', rotateEvery: 0, meetingAlert: 0, meetingTimer: false, location: { mode: 'auto' } },
   alertCover: false, // a meeting card is covering the screen; auto-rotate waits
   timerHold: false, // the clock timer is being set, running, paused, or finished; auto-rotate waits
   now: Date.now(), np: { active: false }, npAt: 0, artwork: null,

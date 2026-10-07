@@ -111,11 +111,26 @@ function nowPlayingMessage() {
   };
 }
 
+// Square crop fills the stage. 16:9 sends the whole frame; the device letterboxes it.
+function presentedArt(art) {
+  const wide = settings.get().artFit === 'wide' && art.wideUrl;
+  return {
+    key: art.key,
+    dataUrl: wide ? art.wideUrl : art.dataUrl,
+    blurUrl: art.blurUrl,
+    tint: art.tint,
+    width: wide ? art.wideWidth : art.width,
+    height: wide ? art.wideHeight : art.height,
+    variant: wide ? 'wide' : 'square',
+  };
+}
+
 function pushNowPlaying(target) {
-  const { art } = current;
-  if (art && target.sentArtKey !== art.key) {
+  const art = current.art && presentedArt(current.art);
+  const stamp = art && `${art.key}:${art.variant}`;
+  if (art && target.sentArtKey !== stamp) {
     target.send({ type: 'artwork', key: art.key, dataUrl: art.dataUrl, blurUrl: art.blurUrl, tint: art.tint, width: art.width, height: art.height });
-    target.sentArtKey = art.key;
+    target.sentArtKey = stamp;
   }
   target.send(nowPlayingMessage());
 }
@@ -382,7 +397,10 @@ volume.on('change', (v) => {
   checkKeyAccess(v);
   link?.send({ type: 'volume', volume: v });
 });
-settings.on('change', (values) => link?.send({ type: 'settings', settings: values }));
+settings.on('change', (values, keys) => {
+  link?.send({ type: 'settings', settings: values });
+  if (keys.includes('artFit') && link) pushNowPlaying(link);
+});
 weather.on('change', (state) => link?.send({ type: 'weather', weather: state }));
 calendar.on('change', (state) => link?.send({ type: 'calendar', calendar: state }));
 appearance.on('change', (dark) => link?.send({ type: 'appearance', dark }));

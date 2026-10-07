@@ -655,6 +655,61 @@ h3 {
   background: transparent;
 }
 
+/* Flat colour (Settings → Background → Color). One colour behind the rail and the stage,
+   and an ink that reads on it. Appearance's light and dark palettes stay out of the way. */
+#app.flat-on {
+  --panel: var(--flat);
+  --stage: var(--flat);
+  --orange: var(--text);
+  --timer-hand: var(--text);
+  --today: var(--text);
+  --today-ink: var(--flat);
+  background: var(--flat);
+}
+#app.flat-on[data-ink="light"] {
+  --text: var(--white);
+  --text-2: var(--white-a70);
+  --muted: var(--white-a50);
+  --line: var(--white-a10);
+  --selected: var(--white-a10);
+  --bar-fill: var(--white);
+  --bar-track: var(--white-a30);
+  --hand: var(--white);
+  --timer-used: var(--white-a20);
+  --c-mark-fill: var(--white-a10);
+  --c-mark-edge: var(--white);
+  --c-hand: var(--white);
+  --c-hand-fill: var(--white-a01);
+  --c-hand-shadow: var(--white-a30);
+  --notch: var(--white-a30);
+  --cloud: var(--white);
+  --cloud-back: var(--slate-300);
+  --moon: var(--cream-100);
+  --rain: var(--sky-300);
+}
+#app.flat-on[data-ink="dark"] {
+  --text: var(--gray-950);
+  --text-2: var(--black-a70);
+  --muted: var(--black-a50);
+  --line: var(--black-a10);
+  --selected: var(--black-a05);
+  --bar-fill: var(--gray-950);
+  --bar-track: var(--black-a20);
+  --hand: var(--gray-950);
+  --timer-used: var(--black-a10);
+  --c-mark-fill: var(--black-a10);
+  --c-mark-edge: var(--black);
+  --c-hand: var(--black);
+  --c-hand-fill: var(--black-a01);
+  --c-hand-shadow: var(--black-a20);
+  --notch: var(--black-a20);
+  --sun: var(--yellow-600);
+  --moon: var(--olive-800);
+  --cloud: var(--slate-200);
+  --cloud-back: var(--slate-400);
+  --rain: var(--sky-700);
+}
+
 /* Screen asleep (backlight off): render nothing, in case the backlight can't be switched. */
 #app.asleep {
   background: var(--black);
@@ -841,9 +896,13 @@ h3 {
   opacity: 1;
 }
 /* Every source fills the square. A 16:9 video thumbnail is cropped to its middle rather than
-   letterboxed, so the stage always reads as one image. */
+   letterboxed, so the stage always reads as one image. Now playing's 16:9 setting keeps the
+   whole frame instead; the stage colour shows in the bars. A square cover still fills the stage. */
 .art-img {
   background: center / cover no-repeat;
+}
+#screen-nowplaying.art-wide .art-img {
+  background-size: contain;
 }
 /* After a skip the new art wipes across behind a soft edge instead of fading: next comes in from
    the right, previous from the left. Only transforms animate. .art-wipe carries a fixed gradient

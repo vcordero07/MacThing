@@ -27,6 +27,10 @@
   .seg button { border: 0; background: none; color: var(--text); font: inherit; font-size: 14px;
     padding: 5px 12px; border-radius: 7px; cursor: pointer; }
   .seg button[aria-pressed="true"] { background: var(--seg-on); box-shadow: 0 1px 3px rgba(0,0,0,.15); font-weight: 600; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+  .swatches button { width: 28px; height: 28px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+  .swatches button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent), inset 0 0 0 1px rgba(0,0,0,.15); }
   h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 8px 18px; }
   .choice { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; cursor: pointer; }
   .choice + .choice { border-top: 1px solid var(--line); }
@@ -59,8 +63,23 @@
   <section>
     <div class="row"><span class="label">Appearance</span>
       <span class="seg" data-key="theme"><button data-v="dark">Dark</button><button data-v="light">Light</button><button data-v="auto">Match Mac</button></span></div>
-    <div class="row"><span class="label">Album art background</span>
-      <span class="seg" data-key="artBackground"><button data-v="false">Off</button><button data-v="true">On</button></span></div>
+    <div class="row"><div><div class="label">Background</div><div class="note">Color fills the screen with the swatch below</div></div>
+      <span class="seg" data-key="background"><button data-v="off">Off</button><button data-v="art">Album art</button><button data-v="color">Color</button></span></div>
+    <div class="row"><div><div class="label">Background color</div><div class="note">Picking one also sets a font color that reads on it</div></div>
+      <span class="swatches" data-key="flatColor">
+        <button data-v="ink" style="background:#111111" aria-label="Black"></button>
+        <button data-v="snow" style="background:#f3f1ec" aria-label="White"></button>
+        <button data-v="red" style="background:#c44536" aria-label="Red"></button>
+        <button data-v="orange" style="background:#e07a2f" aria-label="Orange"></button>
+        <button data-v="gold" style="background:#e6b325" aria-label="Gold"></button>
+        <button data-v="green" style="background:#2f6f4e" aria-label="Green"></button>
+        <button data-v="blue" style="background:#1d4e89" aria-label="Blue"></button>
+        <button data-v="purple" style="background:#5c4d7a" aria-label="Purple"></button>
+      </span></div>
+    <div class="row"><div><div class="label">Font color</div><div class="note">Text on a flat background</div></div>
+      <span class="seg" data-key="fontColor"><button data-v="light">Light</button><button data-v="dark">Dark</button></span></div>
+    <div class="row"><div><div class="label">Now playing</div><div class="note">16:9 keeps the whole frame, with bars above and below</div></div>
+      <span class="seg" data-key="artFit"><button data-v="square">Square</button><button data-v="wide">16:9</button></span></div>
     <div class="row"><span class="label">Temperature</span>
       <span class="seg" data-key="units"><button data-v="F">°F</button><button data-v="C">°C</button></span></div>
     <div class="row"><span class="label">Time format</span>
@@ -119,7 +138,7 @@
 
   function render() {
     const s = state.settings;
-    document.querySelectorAll('.seg').forEach((seg) => {
+    document.querySelectorAll('.seg, .swatches').forEach((seg) => {
       seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(s[seg.dataset.key]))));
     });
     const manual = s.location.mode === 'manual';
@@ -180,7 +199,7 @@
     }));
   }
 
-  document.querySelectorAll('.seg').forEach((seg) => seg.addEventListener('click', (e) => {
+  document.querySelectorAll('.seg, .swatches').forEach((seg) => seg.addEventListener('click', (e) => {
     const v = e.target.dataset?.v;
     if (v === undefined) return;
     save({ [seg.dataset.key]: v === 'true' ? true : v === 'false' ? false : seg.dataset.type === 'number' && v !== '' && !isNaN(v) ? Number(v) : v });

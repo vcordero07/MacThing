@@ -16,15 +16,15 @@ import { CDP, listTargets } from '../bridge/device/cdp.js';
 
 const presets = {
   hug: {
-    suffix: '', artBackground: true, art: 'mock-art.png',
+    suffix: '', background: 'art', art: 'mock-art.png',
     np: { artist: 'HUG', title: 'Cow With Half Moon Parasol', album: 'HUG', duration: 276, elapsed: 69 },
   },
   deafheaven: {
-    suffix: '-deafheaven', artBackground: true, art: 'mock-art-deafheaven.png',
+    suffix: '-deafheaven', background: 'art', art: 'mock-art-deafheaven.png',
     np: { artist: 'Deafheaven', title: 'Dream House', album: 'Sunbather', duration: 554, elapsed: 139 },
   },
   polvo: {
-    suffix: '-polvo', artBackground: false, art: 'mock-art-polvo.png',
+    suffix: '-polvo', background: 'off', art: 'mock-art-polvo.png',
     np: { artist: 'Polvo', title: 'When Will You Die for the Last Time in My Dreams', album: 'Exploded Drawing', duration: 703, elapsed: 176 },
   },
 };
@@ -46,7 +46,7 @@ const midnight = Date.UTC(2026, 8, 18);
 const at = (day, hours) => midnight + day * DAY + hours * HOUR;
 
 const settings = {
-  theme: 'dark', units: 'F', clock24h: false, artBackground: preset.artBackground,
+  theme: 'dark', units: 'F', clock24h: false, background: preset.background,
   clockFace: 'analog', calendarDays: 2, location: { mode: 'auto' },
 };
 

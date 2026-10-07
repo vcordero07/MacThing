@@ -1,12 +1,23 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { state, CT } from '../state.js';
+import { FLAT_COLORS } from '../palette.js';
 import LeftRail from '../components/LeftRail.vue';
 import ScreenStage from '../components/ScreenStage.vue';
 import SettingsRow from '../components/SettingsRow.vue';
-const rows = [
-  { key: 'theme', label: 'Appearance', options: [['dark', 'Dark'], ['light', 'Light'], ['auto', 'Match Mac']] },
-  { key: 'artBackground', label: 'Album art background', options: [[false, 'Off'], [true, 'On']] },
+const rows = computed(() => {
+  const list = [
+    { key: 'theme', label: 'Appearance', options: [['dark', 'Dark'], ['light', 'Light'], ['auto', 'Match Mac']] },
+    { key: 'background', label: 'Background', options: [['off', 'Off'], ['art', 'Album art'], ['color', 'Color']] },
+  ];
+  if (state.settings.background === 'color') {
+    list.push(
+      { key: 'flatColor', label: 'Color', options: FLAT_COLORS.map((c) => [c.id, c.name]) },
+      { key: 'fontColor', label: 'Font color', options: [['light', 'Light'], ['dark', 'Dark']] },
+    );
+  }
+  list.push({ key: 'artFit', label: 'Now playing', options: [['square', 'Square'], ['wide', '16:9']] });
+  list.push(
   { key: 'rotateEvery', label: 'Auto-rotate', options: [[0, 'Off'], [60, '1 min'], [120, '2 min']] },
   { key: 'digitalSeconds', label: 'Digital seconds', options: [[true, 'On'], [false, 'Off']] },
   { key: 'digitalLarge', label: 'Digital size', options: [[false, 'Regular'], [true, 'Large']] },
@@ -14,8 +25,11 @@ const rows = [
   { key: 'meetingTimer', label: 'Meeting timer', options: [[false, 'Off'], [true, 'Auto-start']] },
   { label: 'Weather location', page: 'location', value: s => s.location && s.location.mode === 'manual' ? s.location.name : 'Current location' },
   { label: 'More settings on Mac', page: '', value: () => '' }
-];
+  );
+  return list;
+});
 const selected = ref(0);
+watch(() => rows.value.length, (n) => { if (selected.value > n - 1) selected.value = n - 1; });
 // Six rows fit the stage; past that the list scrolls to keep the selection in view.
 const VISIBLE = 6;
 const scrolled = computed(() => Math.max(0, selected.value - (VISIBLE - 1)));
@@ -23,9 +37,9 @@ const index = row => Math.max(0, row.options.findIndex(option => option[0] === s
 const value = row => row.value ? row.value(state.settings) : row.options[index(row)][1];
 const screen = CT.screen('settings');
 screen.show = () => { selected.value = 0; };
-screen.turn = steps => { selected.value = Math.max(0, Math.min(rows.length - 1, selected.value + steps)); };
+screen.turn = steps => { selected.value = Math.max(0, Math.min(rows.value.length - 1, selected.value + steps)); };
 screen.press = () => {
-  const row = rows[selected.value];
+  const row = rows.value[selected.value];
   if (row.page != null) { CT.send({ type: 'openSettingsPage', section: row.page }); CT.toast('Opened on your Mac'); return; }
   const next = row.options[(index(row) + 1) % row.options.length][0];
   state.settings[row.key] = next;

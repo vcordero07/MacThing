@@ -50,7 +50,7 @@ try {
   }
   assert.equal(mounted, true, 'Vue mounted');
   await evaluate('window.fixtureReceive = window.__carthingReceive; window.__carthingReceive = function(){}; window.fixtureSent = []; CT.send = function(msg){window.fixtureSent.push(msg)}');
-  const settings = { theme: 'dark', clock24h: false, artBackground: false, clockFace: 'analog', calendarDays: 2, location: { mode: 'auto' } };
+  const settings = { theme: 'dark', clock24h: false, background: 'off', clockFace: 'analog', calendarDays: 2, location: { mode: 'auto' } };
   await message({ type: 'settings', settings });
   await message({ type: 'screen', on: true });
   await tick(Date.UTC(2026, 8, 22, 14, 35));
@@ -60,7 +60,7 @@ try {
   await capture('nowplaying-long');
   assert.equal(await evaluate('(function(){var c=document.querySelector("#screen-nowplaying .left-rail-content");return c.lastElementChild.getBoundingClientRect().bottom <= c.getBoundingClientRect().bottom + 1})()'), true, 'Long track fits rail');
   const artwork = 'data:image/svg+xml;base64,' + Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480"><rect width="480" height="480" fill="#15536b"/><circle cx="320" cy="160" r="130" fill="#d89951"/></svg>').toString('base64');
-  await message({ type: 'settings', settings: { ...settings, artBackground: true } });
+  await message({ type: 'settings', settings: { ...settings, background: 'art' } });
   await message({ type: 'nowPlaying', np: { active: true, artist: 'Example artist', title: 'A short title', album: 'Example album', artworkKey: 'fixture-art', duration: 300, elapsed: 60, rate: 0, playing: false } });
   await message({ type: 'artwork', key: 'fixture-art', dataUrl: artwork });
   await capture('artwork-paused');

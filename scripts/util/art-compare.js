@@ -91,7 +91,7 @@ try {
   await fs.mkdir(out, { recursive: true });
 
   for (const theme of THEMES) {
-    await send({ type: 'settings', settings: { ...settings, theme, artBackground: true } });
+    await send({ type: 'settings', settings: { ...settings, theme, background: 'art' } });
     for (const name of Object.keys(processed)) {
       for (const variant of VARIANTS) {
         const id = ++shot;

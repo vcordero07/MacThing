@@ -15,6 +15,12 @@ const next = computed(() => state.calendar.status === 'ok' ? state.calendar.even
 // During a meeting it opens set to the meeting's end, a stop just left of 5 minutes; reset there
 // drops back to the preset, stopped.
 const mode = ref('clock');
+// Auto-rotate waits while a length is being picked, and while a timer is running, paused, or
+// counting past its end. A preset that was never opened does not hold the other screens.
+watch([mode, () => timer.status], () => {
+  const status = timer.status;
+  state.timerHold = status === 'running' || status === 'paused' || status === 'done' || (mode.value === 'timer' && status === 'set');
+}, { immediate: true });
 const screen = CT.screen('clock');
 screen.reselect = () => {
   mode.value = mode.value === 'clock' ? 'timer' : 'clock';

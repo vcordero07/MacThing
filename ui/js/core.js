@@ -168,9 +168,39 @@ export function initializeRuntime(state) {
       state.current = name;
       if (next.show) next.show();
       saveDevScreen();
+      armRotate();
     }
   };
   CT.closeSettings = function () { CT.show(beforeSettings); };
+
+  // Auto-rotate (Settings → Auto-rotate). Each of the four screens stays up for rotateEvery
+  // seconds, then the next one wipes in, and Clock wraps back to Now Playing. A button press
+  // starts that wait over. It waits while Settings is open, the backlight is off, the Mac is
+  // away, a meeting card is up, or the clock timer is in use — and the screen then gets a full
+  // wait before the next change.
+  var rotateDue = 0;
+  var rotateSeen = 0;
+  function rotateEveryMs() {
+    var n = CT.settings.rotateEvery;
+    return n === 60 || n === 120 ? n * 1000 : 0;
+  }
+  function rotateHeld() {
+    return state.offline || CT.asleep || CT.current === 'settings' || state.alertCover || state.timerHold;
+  }
+  function armRotate() {
+    var ms = rotateEveryMs();
+    rotateSeen = ms;
+    rotateDue = ms && !rotateHeld() ? Date.now() + ms : 0;
+  }
+  function tickRotate() {
+    var ms = rotateEveryMs();
+    if (ms !== rotateSeen) return armRotate();
+    if (!ms || rotateHeld()) { rotateDue = 0; return; }
+    if (!rotateDue) { rotateDue = Date.now() + ms; return; }
+    if (Date.now() < rotateDue) return;
+    var at = PAGES.indexOf(CT.current);
+    CT.show(PAGES[(at < 0 ? 0 : at + 1) % PAGES.length]);
+  }
 
   // Dev only (npm run dev): the watcher reloads the page on every change, so remember the screen
   // and how many times each screen's button was pressed again (weather Today/This Week, the
@@ -270,6 +300,7 @@ export function initializeRuntime(state) {
       if (name === CT.current && screen && screen.reselect) {
         reselects[name] = (reselects[name] || 0) + 1;
         saveDevScreen();
+        armRotate();
         return screen.reselect();
       }
       return CT.show(name);
@@ -454,6 +485,7 @@ export function initializeRuntime(state) {
     // own watchdog (device/sleepd.sh) kills the backlight at the same point; this just means the
     // panel shows black rather than "Waiting for your Mac" even without it installed.
     if (!connected && !CT.asleep && performance.now() - offlineSince > (CT.config.offlineSleepMs || 90000)) setAsleep(true);
+    tickRotate();
   }, 1000);
 
   // Runs after every screen script has registered.

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import { state, CT } from '../state.js';
 // Settings → Meeting alerts: a card over every screen from a timed event's alert (its own, from
 // the Mac's Calendar, or a fixed few minutes before) until a few minutes after it starts. Any button or knob press dismisses it (and does nothing
@@ -40,6 +40,7 @@ const due = computed(() => {
 // One meeting at a time: the card shows the first, and a press dismisses all of them, so
 // overlapping meetings don't bring up another card straight after.
 const event = computed(() => due.value[0] || null);
+watch(event, (value) => { state.alertCover = !!value; }, { immediate: true });
 CT.dismissModal = () => {
   if (!event.value) return false;
   due.value.forEach(e => { dismissed[keyOf(e)] = e.start + AFTER_START_MS; });

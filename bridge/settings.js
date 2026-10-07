@@ -14,6 +14,7 @@ export const DEFAULTS = {
   clock24h: false,
   clockFace: 'analog', // 'analog' | 'numbers' | 'digital'
   artBackground: false, // blurred album art behind Now Playing and the widgets
+  rotateEvery: 0, // seconds on each screen before the next: 0 off, 60 or 120. Order is Now Playing, Calendar, Weather, Clock
   location: { mode: 'auto' }, // or { mode: 'manual', name, lat, lon }
   calendars: null, // null = every calendar in the Mac's Calendar app; else an array of calendar ids
   calendarDays: 2, // days of events on the Calendar screen: today plus the next (n − 1)
@@ -27,6 +28,7 @@ const VALID = {
   clock24h: (v) => typeof v === 'boolean',
   clockFace: (v) => ['analog', 'numbers', 'digital'].includes(v),
   artBackground: (v) => typeof v === 'boolean',
+  rotateEvery: (v) => v === 0 || v === 60 || v === 120,
   location: (v) =>
     v?.mode === 'auto' ||
     (v?.mode === 'manual' && typeof v.name === 'string' && Number.isFinite(v.lat) && Number.isFinite(v.lon)),

@@ -757,10 +757,14 @@ h3 {
   --muted: var(--white-a50);
   --line: var(--white-a10);
 }
-#app.ambient-on .m-card {
+/* Album art and a flat colour both turn the accent into the page's text colour. On this card
+   the accent has to be the card's own text, or a light page paints a white pill with white words. */
+#app.ambient-on .m-card,
+#app.flat-on .m-card {
   --orange: var(--text);
 }
-#app.ambient-on .m-when {
+#app.ambient-on .m-when,
+#app.flat-on .m-when {
   color: var(--card); /* the pill is the text colour here */
 }
 .meeting-alert.on .m-card {

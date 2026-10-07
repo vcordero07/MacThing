@@ -1206,6 +1206,13 @@ h3 {
   align-items: center;
   justify-content: center;
   font-size: 175px;
+  /* Centered on the stage, the last digit sits under the dial. A full digit (1ch) would
+     meet the day name, so this stops one rail-inset short of that. The stage lets it
+     draw into the empty part of the rail, which is the same colour. */
+  transform: translateX(calc(-1ch + 24px));
+}
+#screen-clock .screen-stage {
+  overflow: visible;
 }
 .c-digital-large .c-digital-sec {
   margin-top: 8px;

@@ -13,6 +13,8 @@ export const DEFAULTS = {
   units: 'F', // weather temperature: 'F' | 'C'
   clock24h: false,
   clockFace: 'analog', // 'analog' | 'numbers' | 'digital'
+  digitalSeconds: true, // digital clock shows the seconds
+  digitalLarge: false, // digital clock draws the hours and minutes larger
   artBackground: false, // blurred album art behind Now Playing and the widgets
   rotateEvery: 0, // seconds on each screen before the next: 0 off, 60 or 120. Order is Now Playing, Calendar, Weather, Clock
   location: { mode: 'auto' }, // or { mode: 'manual', name, lat, lon }
@@ -27,6 +29,8 @@ const VALID = {
   units: (v) => v === 'F' || v === 'C',
   clock24h: (v) => typeof v === 'boolean',
   clockFace: (v) => ['analog', 'numbers', 'digital'].includes(v),
+  digitalSeconds: (v) => typeof v === 'boolean',
+  digitalLarge: (v) => typeof v === 'boolean',
   artBackground: (v) => typeof v === 'boolean',
   rotateEvery: (v) => v === 0 || v === 60 || v === 120,
   location: (v) =>

@@ -70,7 +70,7 @@ screen.press = () => {
       <div class="fade-view c-view-timer fill" :class="{ on: mode === 'timer' }"><TimeTimer :remaining="remaining" :total="total" :idle="timer.status === 'set' && !timer.meeting" /></div>
       <div class="fade-view fill" :class="{ on: mode === 'clock' }">
         <AnalogClock v-if="face !== 'digital'" :numbers="face === 'numbers'" :now="state.current === 'clock' ? state.now : 0" />
-        <div v-else class="c-digital fill flex gap-10 tabular semibold"><span>{{ time.time }}</span><span class="c-digital-sec accent">{{ String(parts.seconds).padStart(2, '0') }}</span></div>
+        <div v-else class="c-digital fill tabular semibold" :class="{ 'flex gap-10': !state.settings.digitalLarge, 'c-digital-large': state.settings.digitalLarge, 'c-digital-hm': state.settings.digitalSeconds === false }"><span>{{ time.time }}</span><span v-if="state.settings.digitalSeconds !== false" class="c-digital-sec accent">{{ String(parts.seconds).padStart(2, '0') }}</span></div>
       </div>
     </ScreenStage>
   </section>

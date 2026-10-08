@@ -536,6 +536,18 @@ h3 {
 .vol-value {
   min-width: 36px;
 } /* steadies the bar as the number changes width */
+/* A flat colour repaints the page's text and bars. The pill keeps its own background, so its
+   icon, number and bar take the ink that reads on that background rather than the page's. */
+#app.flat-on .volume-hud {
+  color: var(--white);
+  --bar-fill: var(--white);
+  --bar-track: var(--white-a30);
+}
+#app.flat-on.light .volume-hud {
+  color: var(--gray-950);
+  --bar-fill: var(--gray-950);
+  --bar-track: var(--black-a20);
+}
 /* "No volume control on <device>" replaces the bar, and the pill fits the message. */
 .volume-unsupported .volume-hud {
   width: -webkit-max-content;

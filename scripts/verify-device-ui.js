@@ -157,12 +157,12 @@ try {
   await press('4');
   await pause(400);
   await tick(now);
-  // Settings → Meeting timer starts it on its own, without leaving the screen you're on.
+  // Settings → Meeting timer starts it on its own and switches to the clock, unless Settings is open.
   await evaluate("CT.show('weather')");
   await message({ type: 'settings', settings: { ...settings, meetingTimer: true } });
   await tick(now + 5000);
   await pause(1100);
-  assert.equal(await evaluate('CT.current'), 'weather', 'Auto-start stays on the screen you were on');
+  assert.equal(await evaluate('CT.current'), 'clock', 'Auto-start switches to the clock');
   assert.match(await rail(), /Until Standup ends19:5\d/, 'Meeting timer auto-starts');
   await message({ type: 'settings', settings });
   await evaluate("CT.show('clock')");
@@ -181,7 +181,8 @@ try {
   assert.equal(await evaluate('document.querySelector(".meeting-alert").classList.contains("on")'), false, 'A button dismisses the alert');
   assert.equal(await evaluate('CT.current'), 'clock', 'without also acting');
   await message({ type: 'settings', settings });
-  await evaluate("CT.show('settings'); CT.screens.settings.turn(3); CT.screens.settings.press()");
+  // Meeting timer is the eighth row while Color is hidden: Appearance, Background, Now playing, Auto-rotate, Digital seconds, Digital size, Meeting alerts, then Meeting timer.
+  await evaluate("CT.show('settings'); CT.screens.settings.turn(7); CT.screens.settings.press()");
   await pause(100);
   assert.equal(await evaluate('window.fixtureSent.some(m => m.type === "setting" && m.key === "meetingTimer" && m.value === true)'), true);
   await capture('settings');
